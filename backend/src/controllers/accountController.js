@@ -53,6 +53,17 @@ export async function updateAccount(req, res) {
 export async function deleteAccount(req, res) {
   try {
     const id = parseInt(req.params.id, 10);
+    const usage = await accountService.getAccountUsage(id);
+    const totalUsage = usage.invoices + usage.vouchers;
+    if (totalUsage > 0) {
+      return res.status(400).json({
+        message: 'Cannot delete account: it is used by ' +
+          (usage.invoices ? `${usage.invoices} invoice(s)` : '') +
+          (usage.invoices && usage.vouchers ? ' and ' : '') +
+          (usage.vouchers ? `${usage.vouchers} voucher(s)` : '') +
+          '. Remove or reassign them first.'
+      });
+    }
     const deleted = await accountService.deleteAccount(id);
     if (!deleted) {
       return res.status(404).json({ message: 'Account not found' });

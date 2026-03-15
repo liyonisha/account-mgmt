@@ -21,6 +21,11 @@ export async function api(path, options = {}) {
     throw new Error(message);
   }
 
+  // 204 No Content (e.g. DELETE) has no body — do not parse as JSON
+  if (res.status === 204) {
+    return null;
+  }
+
   return res.json();
 }
 

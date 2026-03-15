@@ -1,8 +1,32 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { api } from "../lib/api";
 import { useToast } from "../components/ToastProvider";
 import Button from "../components/Button";
 import Modal from "../components/Modal";
+
+const STORAGE_KEY = "incomeStatementReport";
+
+function loadSavedReport() {
+  try {
+    const raw = typeof window !== "undefined" && window.localStorage.getItem(STORAGE_KEY);
+    if (!raw) return null;
+    const { result } = JSON.parse(raw);
+    return result && result.period ? result : null;
+  } catch {
+    return null;
+  }
+}
+
+function saveReport(result) {
+  try {
+    if (typeof window !== "undefined" && result) {
+      window.localStorage.setItem(STORAGE_KEY, JSON.stringify({
+        result,
+        generatedAt: new Date().toISOString()
+      }));
+    }
+  } catch (_) {}
+}
 
 export default function ReportsPage() {
   const [type, setType] = useState("monthly");
@@ -14,6 +38,11 @@ export default function ReportsPage() {
   const [error, setError] = useState("");
   const [formOpen, setFormOpen] = useState(false);
   const { showToast } = useToast();
+
+  useEffect(() => {
+    const saved = loadSavedReport();
+    if (saved) setResult(saved);
+  }, []);
 
   async function handleGenerate(e) {
     e.preventDefault();
@@ -31,6 +60,7 @@ export default function ReportsPage() {
       }
       const data = await api(`/reports/income-statement?${params.toString()}`);
       setResult(data);
+      saveReport(data);
       setFormOpen(false);
       showToast("success", "Income statement generated.");
     } catch (e) {

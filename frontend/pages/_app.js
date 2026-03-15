@@ -30,9 +30,7 @@ export default function MyApp({ Component, pageProps }) {
             <Link href="/" className="block text-lg font-semibold text-slate-900">
               Account Management
             </Link>
-            <p className="mt-1 text-xs text-slate-500">
-              Admin console for accounts, invoices and reports.
-            </p>
+            
           </div>
           <nav className="flex-1 px-2 py-4 space-y-1 text-sm">
             <NavLink href="/">Dashboard</NavLink>
